@@ -1,5 +1,7 @@
 document.getElementById('workoutForm').addEventListener('submit', function(e) {
   e.preventDefault();
+    // メッセージエリアをクリア
+  document.getElementById('response').innerText = '';
   
   var date = document.getElementById('date').value;
   var weight = document.getElementById('weight').value;
