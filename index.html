@@ -3,49 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>筋トレ管理アプリケーション</title>
-<link rel="stylesheet" href="styles.css">
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-  google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback(drawChart);
+<title>筋トレ管理アプリ</title>
 
-  function drawChart() {
-    fetch('https://script.google.com/macros/s/AKfycbx3gcjd_BFHzEjj2wA5oGbCEbS5EgqNlEAMnZmgt6diC7FHNzLU_m9tzCQBHq1sjy0D/exec')
-      .then(response => response.json())
-      .then(data => {
-        var formattedData = [['種類', '重さ (kg)', '回数']];
-        data.forEach(item => {
-          formattedData.push([item['種類'], parseInt(item['重さ']), parseInt(item['回数'])]);
-        });
+<!--GitHub Pagesを使う場合、下記のように表記しないとCSSが効かない-->
+<link rel="stylesheet" href="https://kato0914.github.io/kintore2/style.css"/>
 
-        var dataTable = google.visualization.arrayToDataTable(formattedData);
-
-        var options = {
-          title: '筋トレ記録',
-          hAxis: {title: '種類'},
-          vAxis: {title: '値'}
-        };
-
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(dataTable, options);
-      })
-      .catch(error => console.error('エラーが発生しました:', error));
-  }
-</script>
 </head>
 <body>
 
 <div class="container">
-  <h2>筋トレ記録</h2>
+  <h2>筋トレ管理アプリ</h2>
   <form id="workoutForm">
-    <label for="exerciseType">種類:</label><br>
-    <input type="text" id="exerciseType" name="type" required><br><br>
-    
-    <label for="weight">重さ (kg):</label><br>
+    <label for="date">日付:</label><br>
+    <input type="date" id="date" name="date" required><br><br>
+
+<script type="text/javascript">
+  window.onload = function () {
+    var date = new Date();
+    date.setDate(date.getDate());
+    var yyyy = date.getFullYear();
+    var mm = ("0" + (date.getMonth() + 1)).slice(-2);
+    var dd = ("0" + date.getDate()).slice(-2);
+    document.getElementById("date").value = yyyy + '-' + mm + '-' + dd;
+  }
+</script>
+
+
+    <label>重さ (kg):</label><br>
     <select id="weight" name="weight" required>
-      <option value="5">5 kg</option>
-      <option value="10">10 kg</option>
+      <option value="" disabled selected>選択してください</option>
+      <option value="0">0 kg</option>
       <option value="15">15 kg</option>
       <option value="20">20 kg</option>
       <option value="25">25 kg</option>
@@ -65,9 +52,11 @@
       <option value="95">95 kg</option>
       <option value="100">100 kg</option>
     </select><br><br>
-    
+
     <label for="reps">回数:</label><br>
     <select id="reps" name="reps" required>
+      <option value="" disabled selected>選択してください</option>
+      <option value="0">0 回</option>
       <option value="5">5 回</option>
       <option value="10">10 回</option>
       <option value="15">15 回</option>
@@ -79,70 +68,72 @@
       <option value="45">45 回</option>
       <option value="50">50 回</option>
     </select><br><br>
-    
-    <label for="date">やった日にち:</label><br>
-    <input type="date" id="date" name="date" required><br><br>
-    
-    <button type="submit">記録する</button>
+
+    <label>筋トレの種類:</label><br>
+    <div class="radio-container">
+      <label>
+        <input type="radio" name="type" value="ショルダープレス" required> ショルダープレス
+      </label>
+      <label>
+        <input type="radio" name="type" value="チェストプレス" required> チェストプレス
+      </label>
+      <label>
+        <input type="radio" name="type" value="ラットプルダウン" required> ラットプルダウン
+      </label>
+      <label>
+        <input type="radio" name="type" value="レッグプレス" required> レッグプレス
+      </label>
+      <label>
+        <input type="radio" name="type" value="アブベンチ" required> アブベンチ
+      </label>
+      <label>
+        <input type="radio" name="type" value="トレッドミル" required> トレッドミル
+      </label>
+    </div><br><br>
+
+    <button type="submit">送信</button>
   </form>
-  
-  <div id="chart_div" style="width: 100%; height: 500px;"></div>
-  <div id="records">
-    <!-- ここに記録されたデータが表示される -->
-  </div>
+
   <div id="response"></div>
+
+<!--グラフページのURLを指定します-->
+  <a href="https://kato0914.github.io/kintore2/graph.html"　target="_blank"/>グラフはこちら
+</a>
+
 </div>
 
 <script>
-document.getElementById('workoutForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  
-  // メッセージエリアをクリア
-  document.getElementById('response').innerText = '';
-  
-  var date = document.getElementById('date').value;
-  var weight = document.getElementById('weight').value;
-  var reps = document.getElementById('reps').value;
-  var type = document.getElementById('exerciseType').value;
-  
-  var formData = new FormData();
-  formData.append('date', date);
-  formData.append('weight', weight);
-  formData.append('reps', reps);
-  formData.append('type', type);
-  
-  // Google Apps ScriptのウェブアプリURLを指定します
-  fetch('https://script.google.com/macros/s/AKfycbx3gcjd_BFHzEjj2wA5oGbCEbS5EgqNlEAMnZmgt6diC7FHNzLU_m9tzCQBHq1sjy0D/exec', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.result === "success") {
-      document.getElementById('response').innerText = "データが正常に送信されました。";
-    } else {
-      document.getElementById('response').innerText = "エラーが発生しました: " + data.message;
-    }
-  })
-  .catch(error => {
-    document.getElementById('response').innerText = 'エラーが発生しました: ' + error.message;
-  });
-});
+  document.getElementById('workoutForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-function displayRecord(record) {
-  var recordsDiv = document.getElementById('records');
-  var recordHTML = `
-    <div>
-      <strong>種類:</strong> ${record.type}<br>
-      <strong>重さ:</strong> ${record.weight} kg<br>
-      <strong>回数:</strong> ${record.reps} 回<br>
-      <strong>やった日にち:</strong> ${record.date}<br>
-      <hr>
-    </div>
-  `;
-  
-  recordsDiv.insertAdjacentHTML('afterbegin', recordHTML);
-}
+    var date = document.getElementById('date').value;
+    var weight = document.getElementById('weight').value;
+    var reps = document.getElementById('reps').value;
+    var type = document.querySelector('input[name="type"]:checked').value;
+
+    var formData = new FormData();
+    formData.append('date', date);
+    formData.append('weight', weight);
+    formData.append('reps', reps);
+    formData.append('type', type);
+
+// Google Apps ScriptのウェブアプリURLを指定します
+    fetch('https://script.google.com/macros/s/AKfycbx3gcjd_BFHzEjj2wA5oGbCEbS5EgqNlEAMnZmgt6diC7FHNzLU_m9tzCQBHq1sjy0D/exec', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.result === "success") {
+        document.getElementById('response').innerText = "データが正常に送信されました。";
+      } else {
+        document.getElementById('response').innerText = "エラーが発生しました: " + data.message;
+      }
+    })
+    .catch(error => {
+      document.getElementById('response').innerText = 'エラーが発生しました: ' + error.message;
+    });
+  });
 </script>
 
 </body>
